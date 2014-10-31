@@ -20,15 +20,20 @@ import signal
 import StringIO
 
 default_log = logging.getLogger('tablesnap')
-if os.environ.get('TABLESNAP_SYSLOG', False):
-    facility = logging.handlers.SysLogHandler.LOG_DAEMON
-    syslog = logging.handlers.SysLogHandler(address='/dev/log', facility=facility)
-    syslog.setFormatter(logging.Formatter('tablesnap: %(message)s'))
-    default_log.addHandler(syslog)
-else:
-    stderr = logging.StreamHandler()
-    stderr.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
-    default_log.addHandler(stderr)
+default_log.setLevel(logging.DEBUG)
+# create file handler which logs even debug messages
+fh = logging.FileHandler('/var/log/tablesnap/tablesnap.log')
+fh.setLevel(logging.DEBUG)
+# create console handler with a higher log level
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+# create formatter and add it to the handlers
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+fh.setFormatter(formatter)
+# add the handlers to logger
+default_log.addHandler(ch)
+default_log.addHandler(fh)
 
 if os.environ.get('TDEBUG', False):
     default_log.setLevel(logging.DEBUG)
